@@ -1,3 +1,4 @@
+es2 - rinominato variabili delta
 es6 - ho tolto la variabile numero_precendete perchè era inutile
 es7 - ho tolto dal primo if la condizione anno % 100 == 0 poichè è già "compresa" nella condizione % 400
 es9 - sostituito le variabili rr, g, b con qt_nero e incremento di qt_nero basato su n

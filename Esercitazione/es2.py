@@ -3,11 +3,11 @@ y1 = float(input("Inserisci y del primo punto "))
 x2 = float(input("Inserisci x del secondo punto "))
 y2 = float(input("Inserisci y del secondo punto "))
 
-deltaX = x2 - x1
-deltaY = y2 - y1
+dx = x2 - x1
+dy = y2 - y1
 
-if(deltaX == 0):
+if(dx == 0):
     print("Retta verticale")
 else:
-    m = deltaY / deltaX
+    m = dy / dx
     print(f"La pendenza è {m}")
