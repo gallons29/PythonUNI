@@ -19,7 +19,6 @@ class WanderingBall:
     def cambia_direzione(self):
         global check_direzione
         self._direzione = randint(1,4) #1: alto, 2: basso, 3: destra, 4: sinistra
-        print(f"check= {check_direzione}. dir= {self._direzione}")
         if self._direzione == 1 and check_direzione != 2: #check_direzione ora è la direzione precedente, l'opposto della direzione 1 che è alto è 2, basso.
             check_direzione = self._direzione
             return (0, -2) #alto: dx = 0, dy = negativo
