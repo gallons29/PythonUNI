@@ -2,39 +2,47 @@ import g2d
 
 ARENA_W, ARENA_H, BALL_D = 500, 500, 20 #BALL_R è il diametro della palla
 
-class Ball:
+class HeroBall:
 
     def __init__(self, x, y):
         self._x = x
         self._y = y
-        self._dx = 2
+        self._dx = 0
         self._dy = 0
     
     def position(self):
         return self._x, self._y
-    
+
+    def go_up(self):
+        self._dy = -5
+        self._dx = 0
+
+    def go_down(self):
+        self._dy = 5
+        self._dx = 0
+
+    def go_left(self):
+        self._dx = -5
+        self._dy = 0
+
+    def go_right(self):
+        self._dx = 5
+        self._dy = 0
+
     def move(self):
         if g2d.key_pressed('w'):
-            self._dy = -2
-            self._dx = 0
+            self.go_up()
         elif g2d.key_pressed('s'):
-            self._dy = 2
-            self._dx = 0
+            self.go_down()
         elif g2d.key_pressed('a'):
-            self._dx = -2
-            self._dy = 0
+            self.go_left()
         elif g2d.key_pressed('d'):
-            self._dx = 2
-            self._dy = 0
+            self.go_right()
 
-        if self._x + self._dx <= 0:
-            self._x = ARENA_W - BALL_D
-        elif self._x + self._dx >= ARENA_W + BALL_D:
-            self._x = 0
         self._x += self._dx
         self._y += self._dy
 
-b1 = Ball(400, 50)
+b1 = HeroBall(400, 50)
 
 def tick():
     g2d.clear_canvas()
