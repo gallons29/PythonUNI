@@ -13,11 +13,7 @@ class Ball:
         return self._x, self._y
     
     def move(self):
-        if self._x + self._dx <= 0:
-            self._x = ARENA_W - BALL_D
-        elif self._x + self._dx >= ARENA_W + BALL_D:
-            self._x = 0
-        self._x += self._dx
+        self._x = (self._x + self._dx) % (ARENA_W + BALL_D)
 
 b1 = Ball(400, 50)
 
