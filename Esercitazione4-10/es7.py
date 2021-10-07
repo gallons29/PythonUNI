@@ -39,8 +39,8 @@ class HeroBall:
         elif g2d.key_pressed('d'):
             self.go_right()
 
-        self._x += self._dx
-        self._y += self._dy
+        self._x = (self._x + self._dx) % (ARENA_W + BALL_D)
+        self._y = (self._y + self._dy) % (ARENA_H + BALL_D)
 
 b1 = HeroBall(400, 50)
 

@@ -27,12 +27,8 @@ class Ball:
             self._dx = 2
             self._dy = 0
 
-        if self._x + self._dx <= 0:
-            self._x = ARENA_W - BALL_D
-        elif self._x + self._dx >= ARENA_W + BALL_D:
-            self._x = 0
-        self._x += self._dx
-        self._y += self._dy
+        self._x = (self._x + self._dx) % (ARENA_W + BALL_D)
+        self._y = (self._y + self._dy) % (ARENA_H + BALL_D)
 
 b1 = Ball(400, 50)
 
