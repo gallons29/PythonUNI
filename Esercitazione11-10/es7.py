@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-'''
-@author  Michele Tomaiuolo - http://www.ce.unipr.it/people/tomamic
-@license This software is free - http://www.gnu.org/licenses/gpl.html
-'''
+import g2d
 
 from random import choice, randrange, randint
 from time import time
@@ -84,12 +80,14 @@ class Ghost(Actor):
 class PacMan(Actor):
     def __init__(self, arena, pos):
         self._x, self._y = pos
-        self._w, self._h = 20, 20
+        self._w, self._h = 16, 16
         self._speed = 2
         self._dx, self._dy = self._speed, 0
         self._lives = 3
         self._last_collision = 0
         self._arena = arena
+        self._animation = 0
+        self._animation_counter = 0
         arena.add(self)
 
     def move(self):
@@ -144,8 +142,47 @@ class PacMan(Actor):
     def size(self):
         return self._w, self._h
 
+
     def symbol(self):
-        return 0, 20
+        self._animation_counter += 1
+        if(self._animation_counter % 8 == 0):
+            if self._animation == 0:
+                self._animation = 1
+            else:
+                self._animation = 0
+        if(self._animation_counter >= 80):
+            self._animation_counter = 0
+        if self._dx == 0 and self._dy > 0:
+            if self._animation == 1:
+                self._animation = 0
+                return 0, 48
+            else:
+                self._animation = 1
+                return 16, 48
+        #per rendere visibile l'animazione ogni 8 tick cambia il return del symbol
+        
+        if self._dx == 0 and self._dy < 0:
+            if self._animation == 1:
+                self._animation = 0
+                return 0, 32
+            else:
+                self._animation = 1
+                return 16, 32
+        if self._dx > 0 and self._dy == 0:
+            if self._animation == 1:
+                self._animation = 0
+                return 0, 0
+            else:
+                self._animation = 1
+                return 16, 0
+        if self._dx < 0 and self._dy == 0:
+            if self._animation == 1:
+                self._animation = 0
+                return 0, 16
+            else:
+                self._animation = 1
+                return 16, 16
+        
 
 
 def print_arena(arena):
@@ -153,17 +190,34 @@ def print_arena(arena):
         print(type(a).__name__, '@', a.position())
 
 
+# def main():
+#     arena = Arena((480, 360))
+#     Ball(arena, (40, 80))
+#     Ball(arena, (80, 40))
+#     Ghost(arena, (120, 80))
+#     PacMan(arena, (30, 40))
+
+#     for i in range(25):
+#         print_arena(arena)
+#         arena.move_all()
+
+# main()  # call main to start the program
+arena = Arena((232, 256))
+pacman = PacMan(arena, (30, 40))
+
+def tick():
+    arena.move_all()
+    g2d.clear_canvas()
+    g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
+    for a in arena.actors():
+        if a.symbol() != None:
+            g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", a.symbol(), a.size(), a.position())
+        else:
+            g2d.fill_rect(a.position(), a.size())
+
 def main():
-    arena = Arena((480, 360))
-    Ball(arena, (40, 80))
-    Ball(arena, (80, 40))
-    Ghost(arena, (120, 80))
-    PacMan(arena, (30, 40))
+    g2d.init_canvas(arena.size())
+    g2d.main_loop(tick)
 
-    for i in range(25):
-        print_arena(arena)
-        arena.move_all()
-
-main()  # call main to start the program
-
+main()
 
