@@ -4,7 +4,7 @@
 @license This software is free - http://www.gnu.org/licenses/gpl.html
 '''
 
-from random import choice, randrange, randint
+from random import choice, randrange
 from time import time
 from actor import Actor, Arena
 import g2d
@@ -52,36 +52,17 @@ class Ball(Actor):
 class Ghost(Actor):
     def __init__(self, arena, pos):
         self._x, self._y = pos
-        self._w, self._h = 16, 16
+        self._w, self._h = 20, 20
         self._arena = arena
         arena.add(self)
         self._visible = True
-        self._check_direzione = 0
-        self._dx, self._dy = 0, 0
 
     def move(self):
-        
-        def cambia_direzione():
-            self._direzione = randint(1,4) #1: alto, 2: basso, 3: destra, 4: sinistra
-            if self._direzione == 1 and self._check_direzione != 2: #self._check_direzione ora è la direzione precedente, l'opposto della direzione 1 che è alto è 2, basso.
-                self._check_direzione = self._direzione
-                return (0, -2) #alto: dx = 0, dy = negativo
-            if(self._direzione == 2 and self._check_direzione != 1):
-                self._check_direzione = self._direzione
-                return (0, 2) #basso: dx = 0, dy = positivo
-            if(self._direzione == 3 and self._check_direzione != 4):
-                self._check_direzione = self._direzione
-                return (2, 0) #destra: dx = positivo, dy = 0
-            if(self._direzione == 4 and self._check_direzione != 3):
-                self._check_direzione = self._direzione
-                return (-2, 0) #sinistra: dx = negativo, dy = 0
-            return (self._dx, self._dy) #ritorna nel caso la direzione casuale sia uguale a quella precedente
-
+        dx = choice([-5, 0, 5])
+        dy = choice([-5, 0, 5])
         arena_w, arena_h = self._arena.size()
-        self._x = (self._x + self._dx) % arena_w
-        self._y = (self._y + self._dy) % arena_h
-        if self._x % 8 == 0 and self._y % 8 == 0:
-            self._dx, self._dy = cambia_direzione()
+        self._x = (self._x + dx) % arena_w
+        self._y = (self._y + dy) % arena_h
 
         if randrange(100) == 0:
             self._visible = not self._visible
@@ -97,8 +78,8 @@ class Ghost(Actor):
 
     def symbol(self):
         if self._visible:
-            return 0, 64
-        return 128, 80
+            return 20, 0
+        return 20, 20
 
 
 class PacMan(Actor):
@@ -189,20 +170,11 @@ def print_arena(arena):
 
 arena = Arena((232, 256))
 pacman = PacMan(arena, (40, 40))
-fantasma = Ghost(arena, (80,80))
 
 def tick():
     arena.move_all()
     g2d.clear_canvas()
     g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
-    
-    xp, yp = pacman.position()
-    xg, yg = fantasma.position()
-    if xp + 16 >= xg and xp <= xg + 16 and yp + 16 >= yg and yp <= yg + 16:
-        #si stanno toccando
-        arena.remove(pacman)
-
-
     for a in arena.actors():
         if a.symbol() != None:
             g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", a.symbol(), a.size(), a.position())
