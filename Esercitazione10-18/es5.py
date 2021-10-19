@@ -1,4 +1,4 @@
-class StazioneMeteo():
+class StazioneMeteo:
     def __init__(self, nome):
         self._nome = nome
         self._dati_piovosita = []
