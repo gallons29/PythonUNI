@@ -146,13 +146,8 @@ class PacMan(Actor):
         return self._lives
 
     def collide(self, other):
-        if self._arena.count() - self._last_collision < 30:
-            return
-        self._last_collision = self._arena.count()
-        if isinstance(other, Ghost):
-            self._lives = 0
-        elif isinstance(other, Ball):
-            self._lives -= 1
+        self._arena.remove(self)
+        # print(self.position(), other.position())
 
     def position(self):
         return self._x, self._y
@@ -196,11 +191,11 @@ def tick():
     g2d.clear_canvas()
     g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
     
-    xp, yp = pacman.position()
-    xg, yg = fantasma.position()
-    if xp + 16 >= xg and xp <= xg + 16 and yp + 16 >= yg and yp <= yg + 16:
-        #si stanno toccando
-        arena.remove(pacman)
+    # xp, yp = pacman.position()
+    # xg, yg = fantasma.position()
+    # if xp + 16 >= xg and xp <= xg + 16 and yp + 16 >= yg and yp <= yg + 16:
+    #     #si stanno toccando
+    #     arena.remove(pacman)
 
 
     for a in arena.actors():
