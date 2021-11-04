@@ -119,20 +119,20 @@ class PacMan(Actor):
 
     def move(self):
         arena_w, arena_h = self._arena.size()
-        self.control(g2d.current_keys())
-        if not in_wall(self._x, self._y):
-            if not (in_wall(self._x, self._y + self._dy)):
-                self._y += self._dy
-                if self._y < 0:
-                    self._y = 0
-                elif self._y > arena_h - self._h:
-                    self._y = arena_h - self._h
-            if not (in_wall(self._x + self._dx, self._y)):
-                self._x += self._dx
-                if self._x < 0:
-                    self._x = 0
-                elif self._x > arena_w - self._w:
-                    self._x = arena_w - self._w
+        if not (in_wall(self._x, self._y + self._dy)):
+            self.control(g2d.current_keys())
+            self._y += self._dy
+            if self._y < 0:
+                self._y = 0
+            elif self._y > arena_h - self._h:
+                self._y = arena_h - self._h
+        if not (in_wall(self._x + self._dx, self._y)):
+            self.control(g2d.current_keys())
+            self._x += self._dx
+            if self._x < 0:
+                self._x = 0
+            elif self._x > arena_w - self._w:
+                self._x = arena_w - self._w
         print(f"x {self._x} y {self._y}")
 #impedire di cambiare symbol verso quella del muro quando si scontra
     def control(self, keys):
