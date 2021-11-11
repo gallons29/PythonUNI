@@ -8,7 +8,7 @@ def isPalyndrome(str: str):
         return False
 
 def main():
-    print(isPalyndrome("was it a car or a cat i saw"))
+    print(isPalyndrome("Was it a car or a cat i saw"))
     print(isPalyndrome("kjjk"))
     print(isPalyndrome("ifdsfdsfdgggfksojncushcuidbsyuefiaisda"))
 main()
