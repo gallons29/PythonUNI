@@ -1,25 +1,17 @@
 from random import randint
 
-w = int(input("Inserisci la larghezza della matrice: "))
-h = int(input("Inserisci l'altezza della matrice: "))
+cols = int(input("Inserisci la larghezza della matrice: "))
+rows = int(input("Inserisci l'altezza della matrice: "))
 matrice = []
 
-for i in range(h):
-    val_matrice = []
-    for j in range(w):
-        val_matrice.append(randint(0, 16))
-    matrice.append(val_matrice)
+for i in range(cols * rows):
+    matrice.append(randint(0, 16))
 
 print(matrice)
 
 with open("Esercitazione11-08/es3.csv", "w") as mat:
-    for linea_matrice in matrice:
-        for val in linea_matrice:
-            #if *ultimo valore della linea*
-            #print(val, end='', file=mat)
-            #else
-            print(val, end=',', file=mat)
-        print(file=mat)
+    for i, v in enumerate(matrice):
+        print(v, end="\n" if i % cols == cols - 1 else ",", file=mat)
 
 
 valore_utente = int(input("Inserisci un valore da cercare e contare nella matrice: "))
@@ -34,4 +26,3 @@ with open("Esercitazione11-08/es3.csv", "r") as mat:
                 counter_valore_utente += 1
 
 print(f"Il valore {valore_utente} è presente {counter_valore_utente} volte.")
-#devo fare in modo che ogni riga del file non finisca con la virgola come commentato sopra
