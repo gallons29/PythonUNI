@@ -181,15 +181,15 @@ def print_arena(arena):
 arena = Arena((232, 256))
 pacman = PacMan(arena, (112, 184))
 #fantasma = Ghost(arena, (80,80))
+biscuits_presences = [1] * len(board)
 
 def biscuits(pos):
     x, y = pos
     c, r, w, h = x//8, y//8, 2, 2
-    for line in board[r:r+h]:
-        if '-' in line[c:c+w]:
-            for item in line[c:c+w]:
-                item = ''
-    #rimuovere i - quando ci passa sopra
+    for i in range(r, r+h):
+        for j in range(c, c+w):
+            if board[i][j] == '-':
+                board[i] = board[i][:c] + '  ' + board[i][c+w:]
 
 def tick():
     arena.move_all()
@@ -208,8 +208,14 @@ def tick():
             g2d.fill_rect(a.position(), a.size())
 
     biscuits(pacman.position())
-
-    
+    for i in range(len(board)):
+        if '-' in board[i]:
+            biscuits_presences[i] = 1
+        else:
+            biscuits_presences[i] = 0
+    if not 1 in biscuits_presences:
+        g2d.alert("You won!")
+        pass
 
 def main():
     g2d.init_canvas(arena.size())
