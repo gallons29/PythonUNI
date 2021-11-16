@@ -11,11 +11,14 @@ def triangolo(p1, p2, p3):
     y12 = (y1 + y2) / 2
     y22 = (y2 + y3) / 2
     y32 = (y3 + y1) / 2
-    
-    g2d.draw_line((x12, y12), (x22, y22))
-    g2d.draw_line((x22, y22), (x32, y32))
-    g2d.draw_line((x32, y32), (x12, y12))
+    if not (abs(x12-x22)**2 + abs(y12-y22)**2)**0.5 < 10:
+        g2d.draw_line((x12, y12), (x22, y22))
+        g2d.draw_line((x22, y22), (x32, y32))
+        g2d.draw_line((x32, y32), (x12, y12))
 
+        triangolo((x1,y1), (x12, y12), (x22, y22))
+        triangolo((x12,y12), (x2, y2), (x32, y32))
+        triangolo((x22,y22), (x32, y32), (x3, y3))
 
     
 
