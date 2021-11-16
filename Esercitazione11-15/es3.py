@@ -1,4 +1,3 @@
-#incompleto
 import g2d
 
 def triangolo(p1, p2, p3):
@@ -16,8 +15,8 @@ def triangolo(p1, p2, p3):
         g2d.draw_line((x22, y22), (x32, y32))
         g2d.draw_line((x32, y32), (x12, y12))
 
-        triangolo((x1,y1), (x12, y12), (x22, y22))
-        triangolo((x12,y12), (x2, y2), (x32, y32))
+        triangolo((x1,y1), (x12, y12), (x32, y32))
+        triangolo((x12,y12), (x2, y2), (x22, y22))
         triangolo((x22,y22), (x32, y32), (x3, y3))
 
     
