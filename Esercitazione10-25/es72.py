@@ -1,4 +1,3 @@
-#NON FINITO
 #!/usr/bin/env python3
 '''
 @author  Michele Tomaiuolo - http://www.ce.unipr.it/people/tomamic
@@ -10,6 +9,9 @@ from time import time
 from actor import Actor, Arena
 import g2d
 from pacman_map import in_wall, board
+import math
+
+DEFAULT_BOARD = board[:]
 
 class Ball(Actor):
     def __init__(self, arena, pos):
@@ -58,35 +60,28 @@ class Ghost(Actor):
         self._arena = arena
         arena.add(self)
         self._visible = True
-        self._check_direzione = 0
-        self._dx, self._dy = 0, 0
+        # self._check_direzione = 0
+        self._dx, self._dy = choice([(2, 0), (0, 2), (0, -2), (-2, 0)])
 
     def move(self):
         
-        def cambia_direzione():
-            self._direzione = randint(1,4) #1: alto, 2: basso, 3: destra, 4: sinistra
-            if self._direzione == 1 and self._check_direzione != 2: #self._check_direzione ora è la direzione precedente, l'opposto della direzione 1 che è alto è 2, basso.
-                self._check_direzione = self._direzione
-                return (0, -2) #alto: dx = 0, dy = negativo
-            if(self._direzione == 2 and self._check_direzione != 1):
-                self._check_direzione = self._direzione
-                return (0, 2) #basso: dx = 0, dy = positivo
-            if(self._direzione == 3 and self._check_direzione != 4):
-                self._check_direzione = self._direzione
-                return (2, 0) #destra: dx = positivo, dy = 0
-            if(self._direzione == 4 and self._check_direzione != 3):
-                self._check_direzione = self._direzione
-                return (-2, 0) #sinistra: dx = negativo, dy = 0
-            return (self._dx, self._dy) #ritorna nel caso la direzione casuale sia uguale a quella precedente
+        def cambia_direzione(dx, dy):
+            dirs = [(2, 0), (0, 2), (0, -2), (-2, 0)]
+            dirs.remove((-dx, -dy))
+            dx, dy = choice(dirs)
+            while in_wall(self._x + dx, self._y + dy):
+                dx, dy = choice(dirs)
+            return dx, dy
+
 
         arena_w, arena_h = self._arena.size()
-        self._x = (self._x + self._dx) % arena_w
-        self._y = (self._y + self._dy) % arena_h
+        if not in_wall(self._x + self._dx, self._y + self._dy):
+            self._x = (self._x + self._dx) % arena_w
+            self._y = (self._y + self._dy) % arena_h
         if self._x % 8 == 0 and self._y % 8 == 0:
-            self._dx, self._dy = cambia_direzione()
+            self._dx, self._dy = cambia_direzione(self._dx, self._dy)
 
-        if randrange(100) == 0:
-            self._visible = not self._visible
+        
 
     def collide(self, other):
         pass
@@ -115,6 +110,7 @@ class PacMan(Actor):
 
         self._delta_animazione = 1
         self._count_anim = 0
+        self._anim = 0
         arena.add(self)
 
     def move(self):
@@ -153,7 +149,7 @@ class PacMan(Actor):
     def symbol(self):
         coordinate_simboli = [[(0, 0), (16, 0), (32, 0)], [(0, 16), (16, 16), (32, 0)], [(0, 32), (16, 32), (32, 0)], [(0, 48), (16, 48), (32, 0)]]
         # coordinate per quando si muove verso destra sono all'indice 0, sinistra indice 1 e così via.
-        coordinate_finali = (0, 0)
+        coordinate_finali = (32, 0)
         if self._dx > 0 and self._dy == 0:
             coordinate_finali = coordinate_simboli[0][self._count_anim]
         if self._dx < 0 and self._dy == 0:
@@ -163,11 +159,14 @@ class PacMan(Actor):
         if self._dx == 0 and self._dy > 0:
             coordinate_finali = coordinate_simboli[3][self._count_anim]
         
-        self._count_anim += self._delta_animazione
-        if self._count_anim == 2:
-            self._delta_animazione = -1
-        if self._count_anim == 0:
-            self._delta_animazione = 1
+        if self._anim >= 3 and not in_wall(self._x + self._dx, self._y + self._dy):
+            self._count_anim += self._delta_animazione
+            if self._count_anim == 2:
+                self._delta_animazione = -1
+            if self._count_anim == 0:
+                self._delta_animazione = 1
+            self._anim = 0
+        self._anim += 1
 
         return coordinate_finali
 
@@ -180,42 +179,75 @@ def print_arena(arena):
 
 arena = Arena((232, 256))
 pacman = PacMan(arena, (112, 184))
-#fantasma = Ghost(arena, (80,80))
-biscuits_presences = [1] * len(board)
+fantasma = Ghost(arena, (8,8))
+
+#per controllare quando non ci sono più biscotti (quindi quando il giocatore vince) uso una lista di len(board) elementi (n di righe), se nella riga è presente almeno un biscotto, l'elemento all'indice di quella riga varrà 1.
+#nella funzione tick setterò a 0 gli indici in cui non è presente nessun biscotto
+biscuits_presences = [1] * len(board) #inizializzo con tutti 1 perchè la board inizialmente è piena di biscotti
+#anche se ci sono righe in cui non è presente nessun biscotto inizialmente (es. la prima è solo #), l'elemento all'indice di queste righe verrà settato a 0 al primo controllo
+#avrei potuto (per essere più preciso) inizializzare la lista con len(board) elementi vuoti e a ogni controllo (nella funzione tick) assegnare 1 o 0 agli elementi ogni volta
 
 def biscuits(pos):
     x, y = pos
-    c, r, w, h = x//8, y//8, 2, 2
+    c, r, w, h = math.ceil(x/8), math.ceil(y/8), 2, 2
     for i in range(r, r+h):
         for j in range(c, c+w):
             if board[i][j] == '-':
-                board[i] = board[i][:c] + '  ' + board[i][c+w:]
+                board[i] = board[i][:c+1] + ' ' + board[i][c+w:]
+            if board[i][j] == '+':
+                board[i] = board[i][:c+1] + ' ' + board[i][c+w:]
 
-def tick():
-    arena.move_all()
-    g2d.clear_canvas()
-    g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
+def draw_biscuits():
     for line in range(0, len(board)):
         for item in range(0, len(board[line])):
             if board[line][item] == '-':
-                item_pos = item * 8 -8, line * 8-8
+                item_pos = item * 8-8, line * 8-8
                 g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", (160, 48), (16, 16), item_pos)
+            if board[line][item] == '+':
+                item_pos = item * 8-8, line * 8-8
+                g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", (176, 48), (16, 16), item_pos)
 
+def new_game():
     for a in arena.actors():
-        if a.symbol() != None:
-            g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", a.symbol(), a.size(), a.position())
-        else:
-            g2d.fill_rect(a.position(), a.size())
+        arena.remove(a)
+    pacman = PacMan(arena, (112, 184))
+    fantasma = Ghost(arena, (8,8))
+    board = DEFAULT_BOARD
+    biscuits_presences = [1] * len(board)
+    print('ciao')
 
-    biscuits(pacman.position())
-    for i in range(len(board)):
-        if '-' in board[i]:
-            biscuits_presences[i] = 1
-        else:
-            biscuits_presences[i] = 0
+def is_game_over():
+    #se non è presente 1 in biscuit_presences vuol dire che in tutte le righe della board non ci sono biscotti, per cui il giocatore ha vinto
     if not 1 in biscuits_presences:
         g2d.alert("You won!")
-        pass
+        return True
+    else:
+        return False
+
+def tick():
+    if not is_game_over():
+        arena.move_all()
+        g2d.clear_canvas()
+        g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
+        
+
+        for a in arena.actors():
+            if a.symbol() != None:
+                g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", a.symbol(), a.size(), a.position())
+            else:
+                g2d.fill_rect(a.position(), a.size())
+
+        biscuits(pacman.position())
+        draw_biscuits()
+        for i in range(len(board)):
+            if not '-' in board[i] and not '+' in board[i]:
+                biscuits_presences[i] = 0
+            else:
+                biscuits_presences[i] = 1
+    else:
+        new_game()
+
+
 
 def main():
     g2d.init_canvas(arena.size())
