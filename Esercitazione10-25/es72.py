@@ -54,7 +54,7 @@ class Ball(Actor):
 
 
 class Ghost(Actor):
-    def __init__(self, arena, pos):
+    def __init__(self, arena, pos, color):
         self._x, self._y = pos
         self._w, self._h = 16, 16
         self._arena = arena
@@ -62,6 +62,15 @@ class Ghost(Actor):
         self._visible = True
         # self._check_direzione = 0
         self._dx, self._dy = choice([(2, 0), (0, 2), (0, -2), (-2, 0)])
+        self._color = color
+        if self._color == 'red':
+            self._symbols = [(0, 64), (32, 64), (64, 64), (96, 64)]
+        elif self._color == 'pink':
+            self._symbols = [(0, 80), (32, 80), (64, 80), (96, 80)]
+        elif self._color == 'cyan':
+            self._symbols = [(0, 96), (32, 96), (64, 96), (96, 96)]
+        elif self._color == 'orange':
+            self._symbols = [(0, 112), (32, 112), (64, 112), (96, 112)]
 
     def move(self):
         
@@ -93,9 +102,19 @@ class Ghost(Actor):
         return self._w, self._h
 
     def symbol(self):
-        if self._visible:
-            return 0, 64
-        return 128, 80
+        coordinate_finali = self._symbols[1]
+        if self._dx > 0 and self._dy == 0:
+            coordinate_finali = self._symbols[0]
+        if self._dx < 0 and self._dy == 0:
+            coordinate_finali = self._symbols[1]
+        if self._dx == 0 and self._dy < 0:
+            coordinate_finali = self._symbols[2]
+        if self._dx == 0 and self._dy > 0:
+            coordinate_finali = self._symbols[3]
+        
+        return coordinate_finali
+    def a_type(self):
+        return 'ghost'
 
 
 class PacMan(Actor):
@@ -138,6 +157,7 @@ class PacMan(Actor):
 
     def collide(self, other):
         self._arena.remove(self)
+        is_game_over(True)
         # print(self.position(), other.position())
 
     def position(self):
@@ -169,6 +189,8 @@ class PacMan(Actor):
         self._anim += 1
 
         return coordinate_finali
+    def a_type(self):
+        return 'pacman'
 
 
 def print_arena(arena):
@@ -179,7 +201,10 @@ def print_arena(arena):
 
 arena = Arena((232, 256))
 pacman = PacMan(arena, (112, 184))
-fantasma = Ghost(arena, (8,8))
+arena.add(Ghost(arena, (72,88), 'red'))
+arena.add(Ghost(arena, (88,88), 'pink'))
+arena.add(Ghost(arena, (112,88), 'cyan'))
+arena.add(Ghost(arena, (96,88), 'orange'))
 
 #per controllare quando non ci sono più biscotti (quindi quando il giocatore vince) uso una lista di len(board) elementi (n di righe), se nella riga è presente almeno un biscotto, l'elemento all'indice di quella riga varrà 1.
 #nella funzione tick setterò a 0 gli indici in cui non è presente nessun biscotto
@@ -187,65 +212,90 @@ biscuits_presences = [1] * len(board) #inizializzo con tutti 1 perchè la board 
 #anche se ci sono righe in cui non è presente nessun biscotto inizialmente (es. la prima è solo #), l'elemento all'indice di queste righe verrà settato a 0 al primo controllo
 #avrei potuto (per essere più preciso) inizializzare la lista con len(board) elementi vuoti e a ogni controllo (nella funzione tick) assegnare 1 o 0 agli elementi ogni volta
 
-def biscuits(pos):
+def biscuits(pos, b):
     x, y = pos
     c, r, w, h = math.ceil(x/8), math.ceil(y/8), 2, 2
     for i in range(r, r+h):
         for j in range(c, c+w):
-            if board[i][j] == '-':
-                board[i] = board[i][:c+1] + ' ' + board[i][c+w:]
-            if board[i][j] == '+':
-                board[i] = board[i][:c+1] + ' ' + board[i][c+w:]
+            if b[i][j] == '-':
+                b[i] = b[i][:c+1] + ' ' + b[i][c+w:]
+            if b[i][j] == '+':
+                b[i] = b[i][:c+1] + ' ' + b[i][c+w:]
+    return b
 
-def draw_biscuits():
-    for line in range(0, len(board)):
-        for item in range(0, len(board[line])):
-            if board[line][item] == '-':
+def draw_biscuits(b):
+    for line in range(0, len(b)):
+        for item in range(0, len(b[line])):
+            if b[line][item] == '-':
                 item_pos = item * 8-8, line * 8-8
                 g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", (160, 48), (16, 16), item_pos)
-            if board[line][item] == '+':
+            if b[line][item] == '+':
                 item_pos = item * 8-8, line * 8-8
                 g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", (176, 48), (16, 16), item_pos)
 
-def new_game():
-    for a in arena.actors():
-        arena.remove(a)
-    pacman = PacMan(arena, (112, 184))
-    fantasma = Ghost(arena, (8,8))
-    board = DEFAULT_BOARD
-    biscuits_presences = [1] * len(board)
-    print('ciao')
+class Board:
+    def __init__(self):
+        self._b = DEFAULT_BOARD[:]
+    
+    def reset(self):
+        self._b = DEFAULT_BOARD[:]
+        return self._b
+    
+    def board(self):
+        return self._b
 
-def is_game_over():
+    def update_b(self, b):
+        self._b = b[:]
+game_board = Board()
+
+def is_game_over(lost):
     #se non è presente 1 in biscuit_presences vuol dire che in tutte le righe della board non ci sono biscotti, per cui il giocatore ha vinto
-    if not 1 in biscuits_presences:
-        g2d.alert("You won!")
-        return True
+    if not lost:
+        if not 1 in biscuits_presences:
+            g2d.alert("You won!")
+            return True
+        else:
+            return False
     else:
-        return False
+        g2d.alert("You lost!")
+        return True
 
 def tick():
-    if not is_game_over():
-        arena.move_all()
-        g2d.clear_canvas()
-        g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
-        
-
+    if is_game_over(False):
+        print('dentro')
         for a in arena.actors():
-            if a.symbol() != None:
-                g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", a.symbol(), a.size(), a.position())
-            else:
-                g2d.fill_rect(a.position(), a.size())
+            arena.remove(a)
+        arena.add(PacMan(arena, (112, 184)))
+        arena.add(Ghost(arena, (8,8)))
+        b = game_board.reset()
+        for a in arena.actors():
+            if a.a_type() == 'pacman':
+                pacman = a
 
-        biscuits(pacman.position())
-        draw_biscuits()
-        for i in range(len(board)):
-            if not '-' in board[i] and not '+' in board[i]:
-                biscuits_presences[i] = 0
-            else:
-                biscuits_presences[i] = 1
-    else:
-        new_game()
+
+    arena.move_all()
+    g2d.clear_canvas()
+    g2d.draw_image("https://tomamic.github.io/images/sprites/pac-man-bg.png", (0, 0))
+    
+
+    for a in arena.actors():
+        if a.symbol() != None:
+            g2d.draw_image_clip("https://tomamic.github.io/images/sprites/pac-man.png", a.symbol(), a.size(), a.position())
+        else:
+            g2d.fill_rect(a.position(), a.size())
+        if a.a_type() == 'pacman':
+            pacman = a
+
+    b = biscuits(pacman.position(), game_board.board())
+    draw_biscuits(b)
+
+    for i in range(len(b)):
+        if not '-' in b[i] and not '+' in b[i]:
+            biscuits_presences[i] = 0
+        else:
+            biscuits_presences[i] = 1
+
+        
 
 
 
