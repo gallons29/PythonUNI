@@ -1,6 +1,5 @@
 n = int(input("n (massimo 3): "))
 while(n > 3):
-    print("n non deve essere maggiore di 3")
     n = int(input("n non deve essere maggiore di 3\n reiserisci n: "))
 
 combinazioni = ""
@@ -26,7 +25,7 @@ cols = n
 rows = n #il numero di righe e colonne coincide con n
 
 def somme_quadrato_magico(mat: list) -> list:
-    raise NotImplementedError('Da fare')
+    pass #da fare
 
 combinazioni_magiche = []
 for combinazione in combinazioni:
