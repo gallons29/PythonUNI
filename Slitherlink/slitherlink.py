@@ -24,7 +24,8 @@ class Slitherlink(BoardGame):
         return self._board[y * self._cols + x]
 
     def flag_at(self, x: int, y: int): 
-        pass
+        if (x % 2 == 0 and y % 2 != 0) or (x % 2 != 0 and y % 2 == 0):
+            self._board[y * self._cols + x] = 'x'
     
     def cols(self) -> int: 
         return self._cols
