@@ -32,7 +32,7 @@ class BoardGameGui:
 
     def update_buttons(self):
         g2d.clear_canvas()
-        g2d.set_color((240, 240, 240)) #le linee le coloro di bianco
+        g2d.set_color((255, 255, 255)) #le linee le coloro di bianco
         cols, rows = self._game.cols(), self._game.rows()
         for y in range(1, rows):
             g2d.draw_line((0, y * H), (cols * W, y * H))
