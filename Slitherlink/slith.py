@@ -1,13 +1,6 @@
 from boardgame import BoardGame
 from boardgamegui import gui_play
 
-LINE, FLAG, PLUS, FREE = ["-", "|"], "x", "+", " "
-print(LINE)
-DIRS = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-
-def add(p1, p2: (int, int)) -> (int, int):
-    return p1[0] + p2[0], p1[1] + p2[1]
-
 class Slitherlink(BoardGame):
 
     def __init__(self, cols, rows, board):
@@ -46,36 +39,14 @@ class Slitherlink(BoardGame):
     def rows(self) -> int: 
         return self._rows
 
-    # def finished(self) -> bool:
-    #     pass
+    def finished(self) -> bool:
+        x = 0
+        y = 0
+        p = (x, y)
+        
+
     def message(self) -> str:
         pass
-
-    def _around(self, pos: (int, int)) -> [str]:
-        return [self.value_at(*add(pos, d)) for d in DIRS]
-
-    def _follow(self, pos, end, prv: (int, int), n: int) -> int:
-        print(pos)
-        if pos == end and n > 0: return n
-        for d in DIRS: #Todo: pay attention to crossroads & bran..
-            nxt = add(pos, d)
-            if nxt != prv and self.value_at(*nxt) == LINE:
-                return self._follow(add(nxt, d), end, nxt, n + 1)
-
-    def finished(self): #Todo: check all rules
-        lines = 0
-        for line in LINE:
-            lines += self._board.count(line)
-
-        if lines == 0: return False
-        if LINE[0] in self._board:
-            i = self._board.index(LINE[0])
-        else:
-            i = self._board.index(LINE[1])
-        print(i)
-        x, y = (i % self._cols, i // self._cols)
-        pos = (x + x % 2, y + y % 2)
-        return self._follow(pos, pos, (x, y), 0) == lines
 
 
 # -------------------------------- #
