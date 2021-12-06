@@ -35,7 +35,9 @@ class Slitherlink(BoardGame):
                 self._board[y * self._cols + x] = ' '
 
     def value_at(self, x: int, y: int) -> str:
-        return self._board[y * self._cols + x]
+        if 0 <= x < self._cols and 0 <= y < self._rows:
+            return self._board[y * self._cols + x]
+        return ""
 
     def flag_at(self, x: int, y: int): 
         if (x % 2 == 0 and y % 2 != 0) or (x % 2 != 0 and y % 2 == 0):
@@ -46,20 +48,17 @@ class Slitherlink(BoardGame):
     def rows(self) -> int: 
         return self._rows
 
-    # def finished(self) -> bool:
-    #     pass
     def message(self) -> str:
-        pass
+        return "Hai vinto!"
 
     def _around(self, pos: (int, int)) -> [str]:
         return [self.value_at(*add(pos, d)) for d in DIRS]
 
     def _follow(self, pos, end, prv: (int, int), n: int) -> int:
-        print(pos)
         if pos == end and n > 0: return n
         for d in DIRS: #Todo: pay attention to crossroads & bran..
             nxt = add(pos, d)
-            if nxt != prv and self.value_at(*nxt) == LINE:
+            if nxt != prv and self.value_at(*nxt) in LINE:
                 return self._follow(add(nxt, d), end, nxt, n + 1)
 
     def finished(self): #Todo: check all rules
