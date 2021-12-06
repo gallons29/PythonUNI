@@ -33,6 +33,33 @@ class Slitherlink(BoardGame):
                 self._board[y * self._cols + x] = '-'
             else:
                 self._board[y * self._cols + x] = ' '
+        elif x % 2 == 0 and y % 2 == 0:
+            #schiaccia +
+            cl = 0 #counter line around
+            cb = 0 #counter blank around
+            cx = 0 #counter x around
+            for d in DIRS:
+                if self.value_at(*add((x, y), d)) == LINE[0] or self.value_at(*add((x, y), d)) == LINE[1]:
+                    cl += 1
+                elif self.value_at(*add((x, y), d)) == FLAG:
+                    cx += 1
+                elif self.value_at(*add((x, y), d)) == FREE:
+                    cb += 1
+            if cb == 1 and cl == 1:
+                for d in DIRS:
+                    if self.value_at(*add((x, y), d)) == FREE:
+                        dx, dy = d
+                        if (x + dx) % 2 == 0 and (y + dy) % 2 != 0:
+                            self._board[(y + dy) * self._cols + x + dx] = LINE[1]
+                        else:
+                            self._board[(y + dy) * self._cols + x + dx] = LINE[0]
+            elif cb == 1 and cx == 1:
+                for d in DIRS:
+                    if self.value_at(*add((x, y), d)) == FREE:
+                        dx, dy = d
+                        self._board[(y + dy) * self._cols + x + dx] = FLAG
+
+                    
 
     def value_at(self, x: int, y: int) -> str:
         if 0 <= x < self._cols and 0 <= y < self._rows:
