@@ -34,17 +34,8 @@ class Slitherlink(BoardGame):
             else:
                 self._board[y * self._cols + x] = ' '
         elif x % 2 == 0 and y % 2 == 0:
-            #schiaccia +
-            cl = 0 #counter line around
-            cb = 0 #counter blank around
-            cx = 0 #counter x around
-            for d in DIRS:
-                if self.value_at(*add((x, y), d)) == LINE[0] or self.value_at(*add((x, y), d)) == LINE[1]:
-                    cl += 1
-                elif self.value_at(*add((x, y), d)) == FLAG:
-                    cx += 1
-                elif self.value_at(*add((x, y), d)) == FREE:
-                    cb += 1
+            #autocompletamento quando schiaccia +
+            cl, cb, cx = self._whats_around(x, y)
             if cb == 1 and cl == 1:
                 for d in DIRS:
                     if self.value_at(*add((x, y), d)) == FREE:
@@ -60,6 +51,18 @@ class Slitherlink(BoardGame):
                         self._board[(y + dy) * self._cols + x + dx] = FLAG
 
                     
+    def _whats_around(self, x, y):
+        cl = 0 #counter line around
+        cb = 0 #counter blank around
+        cx = 0 #counter x around
+        for d in DIRS:
+                if self.value_at(*add((x, y), d)) == LINE[0] or self.value_at(*add((x, y), d)) == LINE[1]:
+                    cl += 1
+                elif self.value_at(*add((x, y), d)) == FLAG:
+                    cx += 1
+                elif self.value_at(*add((x, y), d)) == FREE:
+                    cb += 1
+        return cl, cb, cx
 
     def value_at(self, x: int, y: int) -> str:
         if 0 <= x < self._cols and 0 <= y < self._rows:
@@ -88,6 +91,19 @@ class Slitherlink(BoardGame):
             if nxt != prv and self.value_at(*nxt) in LINE:
                 return self._follow(add(nxt, d), end, nxt, n + 1)
 
+    def _check_nums(self):
+        #Controllo se ogni numero ha intorno il numero di linee giuste
+        for y in range(self._rows):
+            for x in range(self._cols):
+                if self._board[y * self._cols + x] in "0123":
+                    la = int(self._board[y * self._cols + x])
+                    cl, cb, cx = self._whats_around(x, y)
+                    print(la, cl)
+                    if cl != la:
+                        return False
+
+        return True
+
     def finished(self): #Todo: check all rules
         lines = 0
         for line in LINE:
@@ -101,7 +117,7 @@ class Slitherlink(BoardGame):
         print(i)
         x, y = (i % self._cols, i // self._cols)
         pos = (x + x % 2, y + y % 2)
-        return self._follow(pos, pos, (x, y), 0) == lines
+        return self._follow(pos, pos, (x, y), 0) == lines and self._check_nums()
 
 
 # -------------------------------- #
