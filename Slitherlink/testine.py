@@ -1,2 +1,0 @@
-if int("-"):
-    print("safsa")
